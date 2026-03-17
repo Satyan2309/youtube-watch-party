@@ -17,7 +17,12 @@ const io = new Server(server, {
   }
 })
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }))
+const cors = require('cors');
+
+app.use(cors({
+  origin: "https://youtube-watch-party-steel.vercel.app", 
+  credentials: true
+}));
 app.use(express.json())
 
 // Start server only after DB is connected
