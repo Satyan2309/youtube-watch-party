@@ -2,7 +2,27 @@
 
 A real-time YouTube watch party app. Create a room, invite friends, and watch videos in perfect sync — with role-based access control.
 
-**Live Demo:** `https://your-app.onrender.com` *(update after deployment)*
+---
+
+## 🌐 Live Deployment
+
+- **Frontend (Vercel):** https://youtube-watch-party-steel.vercel.app
+- **Backend (Render API):** https://youtube-watch-party-vfnq.onrender.com
+
+---
+
+## 🧪 Quick Test
+
+1. Open the frontend:
+   👉 https://youtube-watch-party-steel.vercel.app
+
+2. Create a room
+
+3. Open the same link in another tab/device
+
+4. Join using the room code
+
+5. Play / Pause → should sync in real-time
 
 ---
 
@@ -10,25 +30,18 @@ A real-time YouTube watch party app. Create a room, invite friends, and watch vi
 
 ```
 [Browser A]  ←──WebSocket──→  [Socket.IO Server]  ←──WebSocket──→  [Browser B]
-                                      │
-                               [Express REST API]
-                                      │
-                               [MongoDB Atlas]
+                     │
+              [Express REST API]
+                     │
+              [MongoDB Atlas]
 ```
 
 ### How WebSockets Enable Real-Time Sync
 
-1. Every client opens a persistent WebSocket connection via Socket.IO on page load
-2. When Host presses Play → `play` event → server validates role → broadcasts `sync_state` to all room members
-3. All clients receive `sync_state` and call `player.playVideo()` at the same timestamp
-4. No polling. No page refresh. Instant, bidirectional communication.
-
-### Role-Based Logic (Backend)
-
-- Every socket event handler calls `hasPermission(participant)` before processing
-- `hasPermission` checks if role is `host` or `moderator` — rejects `participant`
-- `assign_role` is exclusively checked for `role === 'host'`
-- Roles are stored in MongoDB and re-broadcast after every change
+1. Every client opens a persistent WebSocket connection via Socket.IO on page load  
+2. When Host presses Play → `play` event → server validates role → broadcasts `sync_state`  
+3. All clients sync instantly with the same timestamp  
+4. No polling. No refresh. Real-time experience  
 
 ---
 
@@ -36,90 +49,39 @@ A real-time YouTube watch party app. Create a room, invite friends, and watch vi
 
 | Layer | Technology | Why |
 |---|---|---|
-| Frontend | React + Vite (JavaScript) | Fast, component-based UI |
-| Backend | Node.js + Express | Lightweight server, great WebSocket support |
-| Real-time | Socket.IO | Reliable WebSockets with auto-reconnect |
-| Database | MongoDB (Mongoose) | Flexible document model for room/participant data |
-| Video | YouTube IFrame API | Free, controllable embedded player |
-| Deployment | Render.com | Supports WebSocket servers, free tier |
+| Frontend | React + Vite | Fast, modern UI |
+| Backend | Node.js + Express | Lightweight and scalable |
+| Real-time | Socket.IO | Reliable WebSockets |
+| Database | MongoDB Atlas | Flexible data model |
+| Video | YouTube IFrame API | Embedded player |
+| Deployment | Vercel + Render | Full-stack deployment |
 
 ---
 
-## 🚀 Local Setup
+## 🚀 Features
 
-### Prerequisites
-- Node.js 18+
-- MongoDB Atlas account (free at mongodb.com/atlas)
+- ✅ Create / join rooms  
+- ✅ Real-time sync (play, pause, seek)  
+- ✅ YouTube video control  
+- ✅ Role-based access (Host / Moderator / Participant)  
+- ✅ Live participant list  
+- ✅ Invite sharing  
+- ✅ Mobile responsive  
 
-### Backend
+---
 
-```bash
-cd backend
-npm install
-```
+## 🔗 Production URLs
 
-Create `backend/.env`:
-```
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-CLIENT_URL=http://localhost:5173
-```
-
-```bash
-npm run dev
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-```
-
-Create `frontend/.env`:
-```
-VITE_BACKEND_URL=http://localhost:5000
-```
-
-```bash
-npm run dev
-```
-
-Open `http://localhost:5173`
+- Frontend: https://youtube-watch-party-steel.vercel.app  
+- Backend: https://youtube-watch-party-vfnq.onrender.com  
 
 ---
 
 ## 📡 WebSocket Events
 
-| Event | Direction | Payload | Description |
-|---|---|---|---|
-| `create_room` | Client→Server | `{username}` | Create new room, become Host |
-| `join_room` | Client→Server | `{roomId, username}` | Join existing room |
-| `leave_room` | Client→Server | `{roomId}` | Leave room |
-| `play` | Client→Server | `{roomId}` | Play video (Host/Mod only) |
-| `pause` | Client→Server | `{roomId, currentTime}` | Pause video (Host/Mod only) |
-| `seek` | Client→Server | `{roomId, time}` | Seek to time (Host/Mod only) |
-| `change_video` | Client→Server | `{roomId, videoId}` | Change video (Host/Mod only) |
-| `assign_role` | Client→Server | `{roomId, targetUserId, newRole}` | Assign role (Host only) |
-| `remove_participant` | Client→Server | `{roomId, targetUserId}` | Remove user (Host only) |
-| `sync_state` | Server→Clients | `{playState, currentTime, videoId}` | Broadcast video state |
-| `user_joined` | Server→Clients | `{username, userId, role, participants}` | New user joined |
-| `user_left` | Server→Clients | `{userId, participants}` | User left |
-| `role_assigned` | Server→Clients | `{userId, role, participants}` | Role was updated |
-| `participant_removed` | Server→Clients | `{userId, participants}` | User was removed |
-| `you_were_removed` | Server→User | `{message}` | You were kicked |
-
----
-
-## 🎯 Features
-
-- ✅ Create / join rooms with unique 6-character codes
-- ✅ Real-time play, pause, seek synchronization
-- ✅ YouTube video change (paste URL)
-- ✅ Role-based access: Host / Moderator / Participant
-- ✅ Host can promote participants to Moderator
-- ✅ Host can remove participants
-- ✅ Live participant list with roles
-- ✅ Invite link copy
-- ✅ Auto-disconnect handling
-- ✅ Mobile responsive
+- `create_room`
+- `join_room`
+- `play`, `pause`, `seek`
+- `change_video`
+- `assign_role`
+- `sync_state`
