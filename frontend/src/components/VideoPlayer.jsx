@@ -163,7 +163,7 @@ function VideoPlayer({ videoId, videoState, canControl, onPlay, onPause, onDurat
 }, [videoState, videoId, isReady]);
 
   const iframeSrc = videoId
-    ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&mute=1&controls=0&rel=0&iv_load_policy=3&playsinline=1&modestbranding=1&origin=${encodeURIComponent(
+    ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&controls=0&rel=0&iv_load_policy=3&playsinline=1&modestbranding=1&origin=${encodeURIComponent(
         window.location.origin
       )}`
     : null
