@@ -17,7 +17,7 @@ const io = new Server(server, {
   }
 })
 
-const cors = require('cors');
+
 
 app.use(cors({
   origin: "https://youtube-watch-party-steel.vercel.app", 
