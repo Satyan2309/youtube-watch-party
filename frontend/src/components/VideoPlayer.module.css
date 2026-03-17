@@ -1,0 +1,99 @@
+/* src/components/VideoPlayer.module.css */
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+
+.player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #0d0d1a 0%, #080810 70%);
+  gap: 16px;
+}
+
+.placeholderIcon {
+  width: 80px;
+  height: 80px;
+  background: rgba(240, 165, 0, 0.08);
+  border: 1px solid rgba(240, 165, 0, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--accent-gold);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 165, 0, 0.2); }
+  50% { box-shadow: 0 0 0 20px rgba(240, 165, 0, 0); }
+}
+
+.placeholderText {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.placeholderHint {
+  color: var(--text-dim);
+  font-size: 0.83rem;
+  text-align: center;
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+/* Loading overlay */
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(240, 165, 0, 0.2);
+  border-top-color: var(--accent-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* 
+  Block interactions for non-hosts
+  This prevents local play/pause which would break sync
+*/
+.blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 5; /* Above iframe (default z-index is auto/0), below loadingOverlay (10) */
+  background: transparent;
+  cursor: default;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
