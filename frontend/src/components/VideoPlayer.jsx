@@ -136,20 +136,26 @@ function VideoPlayer({ videoId, videoState, canControl, onPlay, onPause, onDurat
     if (videoState) {
         const { currentTime, playing } = videoState;
 
-        // Only seek if the difference is significant (> 2 seconds) or we are paused
-        const timeDiff = Math.abs(lastKnownTimeRef.current - currentTime);
-        if (timeDiff > 2 || !playing) {
-            sendCommand('seekTo', [currentTime, true]);
-        }
-
-        // Play or pause after a short delay
-        setTimeout(() => {
-            if (playing) {
-                sendCommand('playVideo');
-            } else {
-                sendCommand('pauseVideo');
+        if (playing) {
+            // If playing, check if we need to seek (drift > 2s)
+            const timeDiff = Math.abs(lastKnownTimeRef.current - currentTime);
+            if (timeDiff > 2) {
+                sendCommand('seekTo', [currentTime, true]);
             }
-        }, 100);
+            // Ensure we are playing
+            setTimeout(() => {
+                sendCommand('playVideo');
+            }, 100);
+        } else {
+            // If paused, PAUSE FIRST to stop playback immediately
+            sendCommand('pauseVideo');
+            
+            // Then seek to the exact time
+            // We use a small timeout to ensure the pause command is processed first
+            setTimeout(() => {
+                sendCommand('seekTo', [currentTime, true]);
+            }, 100);
+        }
     } else {
         // If no video state, pause the video
         sendCommand('pauseVideo');
@@ -157,7 +163,7 @@ function VideoPlayer({ videoId, videoState, canControl, onPlay, onPause, onDurat
 
     const timer = setTimeout(() => {
         isRemoteRef.current = false;
-    }, 500);
+    }, 1000);
 
     return () => clearTimeout(timer);
 }, [videoState, videoId, isReady]);
