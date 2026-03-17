@@ -157,7 +157,7 @@ function VideoPlayer({ videoId, videoState, canControl, onPlay, onPause, onDurat
 
     const timer = setTimeout(() => {
         isRemoteRef.current = false;
-    }, 1500);
+    }, 500);
 
     return () => clearTimeout(timer);
 }, [videoState, videoId, isReady]);

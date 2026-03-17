@@ -97,7 +97,11 @@ function Controls({ roomId, videoState, canControl, currentVideoId, onSeek, onPl
     const handleTimeUpdate = (e) => {
       if (e.detail >= 0 && !isDragging) {
         setLocalTime((prevTime) => {
-           if (Math.abs(prevTime - e.detail) > 2) {
+           // If we are paused, trust the player time absolutely
+           if (!videoState?.playing) return e.detail;
+           
+           // If playing, only update if we drift by more than 1 second
+           if (Math.abs(prevTime - e.detail) > 1) {
              return e.detail
            }
            return prevTime
@@ -184,7 +188,8 @@ function Controls({ roomId, videoState, canControl, currentVideoId, onSeek, onPl
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const seekPct  = duration > 0 ? Math.min((localTime / duration) * 100, 100) : 0
+  const effectiveDuration = duration > 0 ? duration : 600
+  const seekPct  = Math.min((localTime / effectiveDuration) * 100, 100)
   const isPlaying = videoState?.playing || false
 
   return (
@@ -204,7 +209,7 @@ function Controls({ roomId, videoState, canControl, currentVideoId, onSeek, onPl
           style={{ '--progress': `${seekPct}%` }}
           readOnly={!canControl}
         />
-        <span className={styles.timeLabel}>{formatTime(duration)}</span>
+        <span className={styles.timeLabel}>{formatTime(duration || 0)}</span>
       </div>
 
       {/* MAIN ROW */}

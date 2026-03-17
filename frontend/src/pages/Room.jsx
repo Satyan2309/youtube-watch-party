@@ -234,9 +234,20 @@ function Room() {
     }
   }, [roomId])
 
-  const handlePlay = () => socket.emit('play', { roomId })
-  const handlePause = (time) => socket.emit('pause', { roomId, currentTime: time })
-  const handleSeek = (time) => socket.emit('seek', { roomId, time })
+  const handlePlay = () => {
+    setVideoState(prev => ({ ...prev, playing: true }))
+    socket.emit('play', { roomId })
+  }
+
+  const handlePause = (time) => {
+    setVideoState(prev => ({ ...prev, playing: false, currentTime: time }))
+    socket.emit('pause', { roomId, currentTime: time })
+  }
+
+  const handleSeek = (time) => {
+    setVideoState(prev => ({ ...prev, currentTime: time }))
+    socket.emit('seek', { roomId, time })
+  }
 
   const handleLeave = () => {
     socket.emit('leave_room', { roomId })
