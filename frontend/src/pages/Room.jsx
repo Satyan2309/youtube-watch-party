@@ -17,6 +17,7 @@ function Room() {
   const [currentUser, setCurrentUser] = useState(null)
   const [videoState, setVideoState] = useState({ playing: false, currentTime: 0 })
   const [currentVideoId, setCurrentVideoId] = useState('')
+  const [duration, setDuration] = useState(0)
   const [toasts, setToasts] = useState([])
   const [connected, setConnected] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -74,14 +75,13 @@ function Room() {
 
     const handleSyncState = (data) => {
       console.log('[Socket] sync_state received:', data)
-      // Always update videoState first
-      setVideoState({ playing: data.playState === 'playing', currentTime: data.currentTime })
-      
       // Update videoId if provided - this triggers VideoPlayer to load new iframe
       if (data.videoId && data.videoId !== currentVideoId) {
         console.log('[Socket] Updating currentVideoId to:', data.videoId)
         setCurrentVideoId(data.videoId)
       }
+      // Update videoState
+      setVideoState({ playing: data.playState === 'playing', currentTime: data.currentTime })
     }
 
     const handleRoleAssigned = (data) => {
@@ -236,6 +236,7 @@ function Room() {
 
   const handlePlay = () => socket.emit('play', { roomId })
   const handlePause = (time) => socket.emit('pause', { roomId, currentTime: time })
+  const handleSeek = (time) => socket.emit('seek', { roomId, time })
 
   const handleLeave = () => {
     socket.emit('leave_room', { roomId })
@@ -307,6 +308,7 @@ function Room() {
               canControl={canControl}
               onPlay={handlePlay}
               onPause={handlePause}
+              onDuration={setDuration}
             />
           </div>
           <Controls
@@ -314,6 +316,10 @@ function Room() {
             videoState={videoState}
             canControl={canControl}
             currentVideoId={currentVideoId}
+            onSeek={handleSeek}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            duration={duration}
           />
         </div>
 

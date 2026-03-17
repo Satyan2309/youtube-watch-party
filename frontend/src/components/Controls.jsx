@@ -51,29 +51,21 @@ const formatTime = (seconds) => {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-function Controls({ roomId, videoState, canControl, currentVideoId }) {
-  const [videoUrl,   setVideoUrl]   = useState('')
-  const [urlError,   setUrlError]   = useState('')
-  const [copied,     setCopied]     = useState(false)
-  const [localTime,  setLocalTime]  = useState(0)    // smooth seek bar ke liye
-  const [duration,   setDuration]   = useState(0)
+function Controls({ roomId, videoState, canControl, currentVideoId, onSeek, onPlay, onPause, duration = 0 }) {
+  const [videoUrl, setVideoUrl] = useState('')
+  const [urlError, setUrlError] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [localTime, setLocalTime] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
 
-  const tickRef = useRef(null)  // local time ticker
+  const tickRef = useRef(null)
 
-  // ============================================================
-  // Local time interpolation — seek bar smooth dikhne ke liye
-  // Server har second sync bhejta hai — beech mein hum khud increment karte hain
-  // ============================================================
   useEffect(() => {
-    // videoState se time sync karo (jab server se aaye)
     if (videoState && !isDragging) {
       setLocalTime(videoState.currentTime || 0)
     }
   }, [videoState, isDragging])
 
-  // Playing ho toh har second +1 karo locally (smooth progress)
-  // Use requestAnimationFrame for smoother updates and less reflow
   useEffect(() => {
     if (tickRef.current) cancelAnimationFrame(tickRef.current)
 
@@ -82,7 +74,10 @@ function Controls({ roomId, videoState, canControl, currentVideoId }) {
       
       const updateLocalTime = (currentTime) => {
         if (currentTime - lastTime >= 1000) {
-          setLocalTime(t => t + 1)
+          setLocalTime(t => {
+            const next = t + 1;
+            return duration > 0 ? Math.min(next, duration) : next;
+          })
           lastTime = currentTime
         }
         if (videoState?.playing && !isDragging) {
@@ -96,46 +91,49 @@ function Controls({ roomId, videoState, canControl, currentVideoId }) {
     return () => {
       if (tickRef.current) cancelAnimationFrame(tickRef.current)
     }
-  }, [videoState?.playing, isDragging])
+  }, [videoState?.playing, isDragging, duration])
 
-  // Duration: YouTube embed ki duration pane ka reliable tarika nahi hai
-  // isliye ek reasonable default rakhte hain
-  // Jab seek karo toh percentage se calculate hoga
-  // Duration ko videoState se estimate karte hain (agar available ho)
   useEffect(() => {
-    // Duration set karo — agar koi realistic value nahi hai toh 600 (10 min default)
-    if (!duration || duration === 0) setDuration(600)
-  }, [currentVideoId, duration])
-
-  const handlePlay  = () => {
-    if (!socket.connected) {
-      console.warn('[Controls] Socket not connected, cannot play')
-      return
+    const handleTimeUpdate = (e) => {
+      if (e.detail >= 0 && !isDragging) {
+        setLocalTime((prevTime) => {
+           if (Math.abs(prevTime - e.detail) > 2) {
+             return e.detail
+           }
+           return prevTime
+        })
+      }
     }
-    socket.emit('play',  { roomId })
+
+    window.addEventListener('yt-time-update', handleTimeUpdate)
+    return () => {
+      window.removeEventListener('yt-time-update', handleTimeUpdate)
+    }
+  }, [isDragging])
+
+  const handlePlay = () => {
+    if (onPlay) onPlay()
   }
   
   const handlePause = () => {
-    if (!socket.connected) {
-      console.warn('[Controls] Socket not connected, cannot pause')
-      return
-    }
-    socket.emit('pause', { roomId, currentTime: localTime })
+    if (onPause) onPause(localTime)
   }
 
   const handleSeekChange = (e) => {
     const pct = parseFloat(e.target.value)
-    setLocalTime((pct / 100) * duration)
+    // If duration is 0, use a fallback of 600 just for dragging UI
+    const effectiveDuration = duration > 0 ? duration : 600
+    setLocalTime((pct / 100) * effectiveDuration)
     setIsDragging(true)
   }
 
   const handleSeekRelease = (e) => {
-    const pct     = parseFloat(e.target.value)
-    const newTime = (pct / 100) * duration
-    if (socket.connected) {
-      socket.emit('seek', { roomId, time: newTime })
-    } else {
-      console.warn('[Controls] Socket not connected, cannot seek')
+    const pct = parseFloat(e.target.value)
+    const effectiveDuration = duration > 0 ? duration : 600
+    const newTime = (pct / 100) * effectiveDuration
+    
+    if (onSeek) {
+      onSeek(newTime)
     }
     setLocalTime(newTime)
     setIsDragging(false)
@@ -158,7 +156,6 @@ function Controls({ roomId, videoState, canControl, currentVideoId }) {
     }
     
     setUrlError('')
-    setDuration(600) // reset duration
     console.log('[Controls] Emitting change_video:', { roomId, videoId })
     socket.emit('change_video', { roomId, videoId })
     

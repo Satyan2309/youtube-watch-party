@@ -111,39 +111,6 @@ Open `http://localhost:5173`
 
 ---
 
-## 🌐 Deployment
-
-### Option 1: Render.com (Recommended)
-#### Backend
-1. New Web Service → connect GitHub repo
-2. Root Directory: `backend`
-3. Build Command: `npm install`
-4. Start Command: `node server.js`
-5. Environment Variables: `PORT`, `MONGODB_URI`, `CLIENT_URL`
-
-#### Frontend
-1. New Static Site → connect GitHub repo
-2. Root Directory: `frontend`
-3. Build Command: `npm run build`
-4. Publish Directory: `dist`
-5. Environment Variable: `VITE_BACKEND_URL=https://your-backend.onrender.com`
-
-### Option 2: Railway
-#### Backend
-1. New Project → Deploy from GitHub repo
-2. Settings → Root Directory: `backend`
-3. Variables: `PORT`, `MONGODB_URI`, `CLIENT_URL`
-4. Start Command: `npm start`
-
-#### Frontend
-1. New Project → Deploy from GitHub repo
-2. Settings → Root Directory: `frontend`
-3. Build Command: `npm run build`
-4. Output Directory: `dist`
-5. Variables: `VITE_BACKEND_URL=https://your-backend.up.railway.app`
-
----
-
 ## 🎯 Features
 
 - ✅ Create / join rooms with unique 6-character codes

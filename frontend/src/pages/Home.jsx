@@ -45,14 +45,16 @@ function Home() {
     setLoading(true); setError('')
 
     try {
-      const res = await fetch(`/api/room/${joinCode.trim().toUpperCase()}`)
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/room/${joinCode.trim().toUpperCase()}`)
       const data = await res.json()
       if (!data.exists) {
         setError('That room could not be found. Please double‑check the code and try again.')
         setLoading(false)
         return
       }
-    } catch {}
+    } catch {
+      // If API fails (e.g. CORS or network error), we still try via socket
+    }
 
     if (!socket.connected) socket.connect()
     socket.emit('join_room', { roomId: joinCode.trim().toUpperCase(), username: username.trim() })

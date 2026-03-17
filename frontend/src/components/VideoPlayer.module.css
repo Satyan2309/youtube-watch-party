@@ -71,6 +71,7 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
+  pointer-events: none; /* Let clicks pass through if needed, though blocker handles it */
 }
 
 .loadingSpinner {
