@@ -45,14 +45,19 @@ function VideoPlayer({ videoId, videoState, canControl, onPlay, onPause }) {
       }
 
       // Player is ready to receive commands
-      if (data.event === 'onReady') {
-        console.log('[VideoPlayer] Player ready')
+      if (data.event === 'onReady' || data.event === 'initialDelivery') {
+        console.log('[VideoPlayer] Player ready/initialDelivery')
         setIsReady(true)
         setIsLoading(false)
       }
 
-      // State changes: 1 = Playing, 2 = Paused, 3 = Buffering
+      // State changes: -1 = Unstarted, 0 = Ended, 1 = Playing, 2 = Paused, 3 = Buffering, 5 = Video cued
       if (data.event === 'onStateChange') {
+        // If it's buffering (3) or unstarted (-1), ensure we drop the loading screen
+        if (data.info === 3 || data.info === -1 || data.info === 5) {
+          setIsReady(true)
+          setIsLoading(false)
+        }
         // If the change was triggered by a remote command, ignore it to prevent loops
         if (isRemoteRef.current) return
         
@@ -94,13 +99,13 @@ function VideoPlayer({ videoId, videoState, canControl, onPlay, onPause }) {
     // Reset remote flag after a short delay to allow events to settle
     const timer = setTimeout(() => {
       isRemoteRef.current = false
-    }, 500)
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [videoState, videoId, isReady])
 
   const iframeSrc = videoId
-    ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0&controls=1&rel=0&iv_load_policy=3&playsinline=1&modestbranding=1&origin=${encodeURIComponent(
+    ? `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&mute=1&controls=1&rel=0&iv_load_policy=3&playsinline=1&modestbranding=1&origin=${encodeURIComponent(
         window.location.origin
       )}`
     : null
